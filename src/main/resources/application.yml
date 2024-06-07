@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: ranking
+  datasource:
+    url: jdbc:h2:file:./h2db/ranking;DB_CLOSE_DELAY=-1
+  jpa:
+    hibernate:
+      ddl-auto: update
+ranking:
+  cache: ./target/cache
+  url: https://www.swimrankings.net/index.php?
+  athleteDetails: page=athleteDetail&athleteId=%s
+  meetDetails: page=meetDetail&meetId=%s&clubId=%s
