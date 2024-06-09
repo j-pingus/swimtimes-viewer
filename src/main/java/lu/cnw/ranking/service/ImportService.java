@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lu.cnw.ranking.domain.*;
 import lu.cnw.ranking.repository.*;
+import lu.cnw.ranking.utils.DateUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,12 +29,14 @@ public class ImportService {
                 clubRepository.save(new Club()
                         .setName(athleteDetails.club())
                 ));
+        logger.info("Club:{}", club);
         Athlete athlete = foundAthlete.orElseGet(() ->
                 athleteRepository.save(new Athlete()
                         .setSwimRankingId(id)
                         .setName(athleteDetails.name())
                         .setClub(club)
                 ));
+        logger.info("Athlete:{}", athlete);
         athleteDetails.competitionList().forEach(competition -> {
             importCompetition(athlete, competition);
         });
@@ -41,14 +44,16 @@ public class ImportService {
 
     private void importCompetition(Athlete athlete, SwimRankingBrowserService.Competition comp) {
         var foundCompetition = competitionRepository.findBySwimRankingId(comp.swimRankingId());
-        if (foundCompetition.isPresent()) return;
-        Competition competition =
+        //if (foundCompetition.isPresent()) return;
+        if (!DateUtil.isYearOfInteres(comp.date())) return;
+        Competition competition = foundCompetition.orElseGet(() ->
                 competitionRepository.save(new Competition()
                         .setName(comp.city())
                         .setDate(comp.date())
                         .setCourse(comp.course())
                         .setSwimRankingId(comp.swimRankingId())
-                );
+                ));
+        logger.info("Competition:{}", competition);
         try {
             swimRankingBrowserService.getAthleteTimes(athlete.getName(), athlete.getSwimRankingId(), comp.swimRankingId(), comp.clubId()).forEach(
                     time -> {

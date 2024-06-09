@@ -26,6 +26,7 @@ class ImportServiceTest {
     @Test
     void importAthlete() throws IOException {
         service.importAthlete("5423869");
+        service.importAthlete("4972119");
         System.out.println(repository.findAll());
         System.out.println(competitionRepository.findAll());
         System.out.println(strokeRepository.findAll());

@@ -31,12 +31,12 @@ public class ReferencesController {
 
     @GetMapping("club/{id}/athletes")
     List<Athlete> getAthletes(@PathVariable int id) {
-        return athleteRepository.findByClubId(id);
+        return athleteRepository.findByClubIdOrderByName(id);
     }
 
     @GetMapping("stroke")
     List<Stroke> getStrokes() {
-        return strokeRepository.findAll(Sort.by("distance","name"));
+        return strokeRepository.findAll(Sort.by("distance", "name"));
     }
 
 }

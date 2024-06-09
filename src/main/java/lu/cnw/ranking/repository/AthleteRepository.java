@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface AthleteRepository extends CrudRepository<Athlete, Integer> {
     Optional<Athlete> findBySwimRankingId(String id);
 
-    List<Athlete> findByClubId(int id);
+    List<Athlete> findByClubIdOrderByName(int id);
 }

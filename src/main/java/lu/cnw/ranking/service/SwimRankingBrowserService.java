@@ -10,11 +10,16 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class SwimRankingBrowserService {
+    private static long DAY = 24 * 60 * 60 * 1000;
     @Value("${ranking.cache}")
     String cacheFolder;
     @Value("${ranking.url}")
@@ -26,7 +31,7 @@ public class SwimRankingBrowserService {
 
     public AthleteDetails getAthleteDetails(String id) throws IOException {
         String key = "athlete/" + id;
-        var detailsHtmlDoc = Jsoup.parse(getCached(key, athleteDetails, id));
+        var detailsHtmlDoc = Jsoup.parse(getCached(Retention.DAY, key, athleteDetails, id));
         var info = detailsHtmlDoc.getElementById("athleteinfo");
         var name = info.getElementById("name");
         var club = info.getElementById("nationclub");
@@ -54,8 +59,8 @@ public class SwimRankingBrowserService {
     }
 
     public List<AthleteTime> getAthleteTimes(String name, String athleteId, String meetId, String clubId) throws IOException {
-        String key = "competition/" + meetId + "/" + clubId + "/" + athleteId;
-        String competitionDetails = getCached(key, meetDetails, meetId, clubId);
+        String key = "competition/" + meetId + "/" + clubId;
+        String competitionDetails = getCached(Retention.FOREVER, key, meetDetails, meetId, clubId);
         var parsedDoc = Jsoup.parse(competitionDetails);
         var competitionRows = parsedDoc.select("tr.meetResult1,tr.meetResult0");
         boolean take = false;
@@ -66,6 +71,7 @@ public class SwimRankingBrowserService {
                 continue;
             }
             if (take) {
+                if (row.select("td.name").size() > 1) break;
                 String time = getFirstText(row, "a.time");
                 String stroke = getFirstText(row, "td.name");
                 times.add(new AthleteTime(
@@ -84,23 +90,23 @@ public class SwimRankingBrowserService {
         if (!time.contains(".")) {
             return 0d;
         }
-        var splitDec=time.split("\\.");
-        var decimals = Integer.valueOf(splitDec[1]).doubleValue()/100;
-        if(splitDec[0].contains(":")){
+        var splitDec = time.split("\\.");
+        var decimals = Integer.valueOf(splitDec[1]).doubleValue() / 100;
+        if (splitDec[0].contains(":")) {
             var split = splitDec[0].split(":");
-            if(split.length==2){
+            if (split.length == 2) {
                 var seconds = Integer.valueOf(split[1]).doubleValue();
-                var minutes = Integer.valueOf(split[0]).doubleValue()*60;
-                return minutes+seconds+decimals;
-            }else if(split.length==3){
+                var minutes = Integer.valueOf(split[0]).doubleValue() * 60;
+                return minutes + seconds + decimals;
+            } else if (split.length == 3) {
                 var seconds = Integer.valueOf(split[2]).doubleValue();
-                var minutes = Integer.valueOf(split[1]).doubleValue()*60;
-                var hours = Integer.valueOf(split[1]).doubleValue()*3600;
-                return hours+minutes+seconds+decimals;
+                var minutes = Integer.valueOf(split[1]).doubleValue() * 60;
+                var hours = Integer.valueOf(split[1]).doubleValue() * 3600;
+                return hours + minutes + seconds + decimals;
             }
             return 9999999d;
-        }else{
-            return Integer.valueOf(splitDec[0]).doubleValue()+decimals;
+        } else {
+            return Integer.valueOf(splitDec[0]).doubleValue() + decimals;
         }
     }
 
@@ -109,8 +115,15 @@ public class SwimRankingBrowserService {
         return found == null ? "" : found.text();
     }
 
-    private String getCached(String key, String page, String... args) throws IOException {
+    private String getCached(Retention retention, String key, String page, String... args) throws IOException {
         File cached = new File(cacheFolder, key);
+        if (retention == Retention.DAY) {
+            Path file = Paths.get(cached.getAbsolutePath());
+            BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
+            if (attr.creationTime().toMillis() + DAY < System.currentTimeMillis()) {
+                cached.delete();
+            }
+        }
         if (!cached.exists()) {
             File parent = cached.getParentFile();
             if (!parent.exists()) {
@@ -125,10 +138,15 @@ public class SwimRankingBrowserService {
         return FileUtils.readFileToString(cached, Charset.defaultCharset());
     }
 
-    public record AthleteTime(String time, Double seconds, String stroke,int distance, String place) {
+    private enum Retention {
+        DAY, FOREVER
     }
 
-    public record AthleteDetails(String swimRankingId, String name, String club, java.util.List<Competition> competitionList) {
+    public record AthleteTime(String time, Double seconds, String stroke, int distance, String place) {
+    }
+
+    public record AthleteDetails(String swimRankingId, String name, String club,
+                                 java.util.List<Competition> competitionList) {
     }
 
     public record Competition(String swimRankingId, String date, String city, String course, String clubId) {

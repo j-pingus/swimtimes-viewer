@@ -31,7 +31,18 @@ class SwimRankingBrowserServiceTest {
             }
         });
     }
-
+    @Test
+    void getAthlete2() throws IOException {
+        service.getAthleteDetails("5478192").competitionList().forEach(
+                c->{
+                    try {
+                        service.getAthleteTimes("GASPARD, Olivia","5478192",c.swimRankingId(),c.clubId());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+    }
     @Test
     void getAthleteTimes() throws IOException {
         var times = service.getAthleteTimes("EVEN, Renaud", "5423869", "645678", "73544");

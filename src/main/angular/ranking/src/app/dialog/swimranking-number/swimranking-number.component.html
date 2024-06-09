@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>encode swimRanking ID</h2>
+<mat-dialog-content>
+  <p>Find your athlete swinranking id and encode it below</p>
+  <mat-form-field>
+    <mat-label>SwimRankingId</mat-label>
+    <input matInput [(ngModel)]="data.id">
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data.id" cdkFocusInitial>Ok</button>
+</mat-dialog-actions>

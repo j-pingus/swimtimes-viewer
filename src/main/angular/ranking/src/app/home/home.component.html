@@ -1,1 +1,11 @@
-<p>Clubs</p>
+<div class="club">
+  <button *ngFor="let club of clubs | async" mat-raised-button color="primary" (click)="go(club.id)">
+    {{club.name}}
+  </button>
+  <button mat-raised-button color="accent" (click)="import()">
+    Import athlete
+  </button>
+</div>
+<div>
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,3 @@
+<button mat-raised-button color="accent" *ngFor="let athlete of athletes | async" (click)="go(athlete.id)">
+  {{athlete.name}}
+</button>

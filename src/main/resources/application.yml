@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: ranking
@@ -9,5 +10,7 @@ spring:
 ranking:
   cache: ./target/cache
   url: https://www.swimrankings.net/index.php?
-  athleteDetails: page=athleteDetail&athleteId=%s
+  athleteDetails: page=athleteDetail&athleteId=%s&athletePage=MEET
   meetDetails: page=meetDetail&meetId=%s&clubId=%s
+server:
+  port: 8901
