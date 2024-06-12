@@ -55,7 +55,7 @@ public class ImportService {
                 ));
         logger.info("Competition:{}", competition);
         try {
-            swimRankingBrowserService.getAthleteTimes(athlete.getName(), athlete.getSwimRankingId(), comp.swimRankingId(), comp.clubId()).forEach(
+            swimRankingBrowserService.getAthleteTimes(athlete.getName(), comp.swimRankingId(), comp.clubId()).forEach(
                     time -> {
                         var foundStroke = strokeRepository.findByName(time.stroke());
                         var stroke = foundStroke.orElseGet(

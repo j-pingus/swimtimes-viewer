@@ -1,5 +1,6 @@
 package lu.cnw.ranking.service;
 
+import lombok.extern.slf4j.Slf4j;
 import lu.cnw.ranking.utils.DistanceConverter;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
@@ -15,11 +16,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
+@Slf4j
 public class SwimRankingBrowserService {
-    private static long DAY = 24 * 60 * 60 * 1000;
     @Value("${ranking.cache}")
     String cacheFolder;
     @Value("${ranking.url}")
@@ -58,7 +61,7 @@ public class SwimRankingBrowserService {
                 competitionList);
     }
 
-    public List<AthleteTime> getAthleteTimes(String name, String athleteId, String meetId, String clubId) throws IOException {
+    public List<AthleteTime> getAthleteTimes(String name, String meetId, String clubId) throws IOException {
         String key = "competition/" + meetId + "/" + clubId;
         String competitionDetails = getCached(Retention.FOREVER, key, meetDetails, meetId, clubId);
         var parsedDoc = Jsoup.parse(competitionDetails);
@@ -115,11 +118,39 @@ public class SwimRankingBrowserService {
         return found == null ? "" : found.text();
     }
 
+    public Set<AthleteDetails> findAthletes(String clubId) {
+        Set<AthleteDetails> ret = new HashSet<>();
+        FileUtils.listFiles(new File(cacheFolder, "competition"), null, true).forEach(
+                file -> {
+                    if (file.getName().equals(clubId)) {
+                        try {
+                            Jsoup.parse(file).select("tr.meetResult1").forEach(
+                                    row -> {
+                                        var anchor = row.selectFirst("a");
+                                        var url = anchor.attr("href");
+                                        var pos = url.indexOf("athleteId=");
+                                        if (pos > -1) {
+                                            var athleteId = url.substring(pos + 10);
+                                            var name = anchor.text();
+                                            ret.add(new AthleteDetails(athleteId, name, null, null));
+                                        }
+                                    }
+                            );
+                        } catch (IOException e) {
+                            logger.error("Could not process {}", file, e);
+                        }
+                    }
+                }
+        );
+        return ret;
+    }
+
     private String getCached(Retention retention, String key, String page, String... args) throws IOException {
         File cached = new File(cacheFolder, key);
-        if (retention == Retention.DAY) {
+        if (cached.exists() && retention == Retention.DAY) {
             Path file = Paths.get(cached.getAbsolutePath());
             BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
+            long DAY = 24 * 60 * 60 * 1000;
             if (attr.creationTime().toMillis() + DAY < System.currentTimeMillis()) {
                 cached.delete();
             }
@@ -131,7 +162,7 @@ public class SwimRankingBrowserService {
             }
             //https://www.swimrankings.net/index.php?page=meetDetail&meetId=645678&clubId=73544
             FileUtils.writeStringToFile(cached,
-                    Jsoup.connect(swimRangingUrl + String.format(page, args))
+                    Jsoup.connect(swimRangingUrl + String.format(page, (Object[]) args))
                             .execute().body(),
                     Charset.defaultCharset());
         }
