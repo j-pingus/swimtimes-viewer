@@ -14,6 +14,7 @@ import { SwimrankingNumberComponent } from './dialog/swimranking-number/swimrank
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatInputModule} from "@angular/material/input";
 import {FormsModule} from "@angular/forms";
+import { TimeDetailsComponent } from './dialog/time-details/time-details.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import {FormsModule} from "@angular/forms";
     HomeComponent,
     ClubComponent,
     AthleteComponent,
-    SwimrankingNumberComponent
+    SwimrankingNumberComponent,
+    TimeDetailsComponent
   ],
   imports: [
     BrowserModule,

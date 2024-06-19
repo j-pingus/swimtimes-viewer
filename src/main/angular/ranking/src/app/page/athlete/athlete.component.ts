@@ -6,6 +6,8 @@ import {Stroke} from "../../domain/Stroke";
 import {AthleteService} from "../../services/athlete.service";
 import {Time} from "../../domain/Time";
 import {Athlete} from "../../domain/Athlete";
+import {MatDialog} from "@angular/material/dialog";
+import {TimeDetailsComponent} from "../../dialog/time-details/time-details.component";
 
 @Component({
   selector: 'app-athlete',
@@ -22,7 +24,8 @@ export class AthleteComponent implements OnInit {
 
   constructor(route: ActivatedRoute,
               private referenceService: ReferencesService,
-              private athleteService: AthleteService) {
+              private athleteService: AthleteService,
+              public dialog: MatDialog) {
     route.params.subscribe(params => {
       // (+) converts string 'id' to a number
       var athleteId = +params['id'];
@@ -32,7 +35,8 @@ export class AthleteComponent implements OnInit {
       this.reload(athleteId);
     });
   }
-  reload(athleteId:number){
+
+  reload(athleteId: number) {
     this.referenceService.getStrokes().subscribe(strokes => {
       this.strokes = strokes.map(
         stroke => {
@@ -44,11 +48,12 @@ export class AthleteComponent implements OnInit {
       );
     });
   }
+
   ngOnInit(): void {
   }
 
   showYear(year: string) {
-    this.strokes=this.strokes.map(s => {
+    this.strokes = this.strokes.map(s => {
       return {
         stroke: s.stroke,
         times: this.athleteService.getTimesYear(this.athlete.id, s.stroke.id, year)
@@ -57,9 +62,15 @@ export class AthleteComponent implements OnInit {
   }
 
   import(swimRankingId: string) {
-    this.athleteService.importAthelete(this.athlete.swimRankingId).subscribe(()=>{
+    this.athleteService.importAthelete(this.athlete.swimRankingId).subscribe(() => {
       this.reload(this.athlete.id);
     })
+  }
+
+  openDialog(time: Time) {
+    this.dialog.open(TimeDetailsComponent, {
+      data: time
+    });
   }
 }
 

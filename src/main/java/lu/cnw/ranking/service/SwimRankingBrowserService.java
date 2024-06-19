@@ -37,13 +37,12 @@ public class SwimRankingBrowserService {
         var detailsHtmlDoc = Jsoup.parse(getCached(Retention.DAY, key, athleteDetails, id));
         var info = detailsHtmlDoc.getElementById("athleteinfo");
         var name = info.getElementById("name");
-        var club = info.getElementById("nationclub");
+        var club = clubName(info.getElementById("nationclub"));
         var competitions = detailsHtmlDoc.select("tr.athleteMeet0,tr.athleteMeet1");
         var competitionList = competitions.stream()
                 .map(competition -> {
                     var city = competition.selectFirst("td.city");
                     var link = city.selectFirst("a[href]").attr("href");
-                    //https://www.swimrankings.net/index.php?page=meetDetail&meetId=645678&clubId=73544
                     var splitted = link.split("&");
                     var meetId = splitted[1].split("=")[1];
                     var clubId = splitted[2].split("=")[1];
@@ -57,8 +56,17 @@ public class SwimRankingBrowserService {
         return new AthleteDetails(
                 id,
                 name.childNode(0).toString().trim(),
-                club.text(),
+                club,
                 competitionList);
+    }
+
+    private String clubName(Element nationclub) {
+        if(nationclub.childNodeSize()>=4){
+            var clubName = nationclub.childNode(3).toString();
+            return clubName
+                    .replace(" - Luxembourg","");
+        }
+        return nationclub.text();
     }
 
     public List<AthleteTime> getAthleteTimes(String name, String meetId, String clubId) throws IOException {
@@ -160,7 +168,6 @@ public class SwimRankingBrowserService {
             if (!parent.exists()) {
                 parent.mkdirs();
             }
-            //https://www.swimrankings.net/index.php?page=meetDetail&meetId=645678&clubId=73544
             FileUtils.writeStringToFile(cached,
                     Jsoup.connect(swimRangingUrl + String.format(page, (Object[]) args))
                             .execute().body(),

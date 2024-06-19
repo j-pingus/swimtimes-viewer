@@ -9,7 +9,8 @@
     <td class="stroke">{{stroke.stroke.name}}</td>
     <td class="times">
       <span *ngFor="let time of stroke.times | async"
-            [matTooltip]="time.competition.name + '/' + time.competition.date +'/'+time.competition.course" [ngClass]="'b'+time.competition.course">
+            (click)="openDialog(time)"
+            [ngClass]="'b'+time.competition.course">
         {{time.time}},
       </span>
     </td>
