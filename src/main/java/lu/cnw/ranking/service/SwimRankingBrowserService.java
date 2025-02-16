@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import lu.cnw.ranking.utils.DistanceConverter;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -32,39 +31,33 @@ public class SwimRankingBrowserService {
     @Value("${ranking.meetDetails}")
     String meetDetails;
 
-    public AthleteDetails getAthleteDetails(String id) throws IOException {
+    public Optional<AthleteDetails> getAthleteDetails(String id) throws IOException {
         String key = "athlete/" + id;
-        var detailsHtmlDoc = Jsoup.parse(getCached(Retention.DAY, key, athleteDetails, id));
-        var info = detailsHtmlDoc.getElementById("athleteinfo");
-        var name = info.getElementById("name");
-        var club = clubName(info.getElementById("nationclub"));
-        var competitions = detailsHtmlDoc.select("tr.athleteMeet0,tr.athleteMeet1");
-        var competitionList = competitions.stream()
-                .map(competition -> {
-                    var city = competition.selectFirst("td.city");
-                    var link = city.selectFirst("a[href]").attr("href");
-                    var splitted = link.split("&");
-                    var meetId = splitted[1].split("=")[1];
-                    var clubId = splitted[2].split("=")[1];
-                    return new Competition(
-                            meetId,
-                            getFirstText(competition, "td.date"),
-                            getFirstText(competition, "td.city"),
-                            getFirstText(competition, "td.course"),
-                            clubId);
-                }).toList();
-        return new AthleteDetails(
-                id,
-                name.childNode(0).toString().trim(),
-                club,
-                competitionList);
+        Document detailsHtmlDoc = Jsoup.parse(this.getCached(SwimRankingBrowserService.Retention.DAY, key, this.athleteDetails, id));
+        Element info = detailsHtmlDoc.getElementById("athleteinfo");
+        if (info == null) {
+            return Optional.empty();
+        } else {
+            Element name = info.getElementById("name");
+            String club = this.clubName(info.getElementById("nationclub"));
+            Elements competitions = detailsHtmlDoc.select("tr.athleteMeet0,tr.athleteMeet1");
+            List<Competition> competitionList = competitions.stream().map((competition) -> {
+                Element city = competition.selectFirst("td.city");
+                String link = city.selectFirst("a[href]").attr("href");
+                String[] splitted = link.split("&");
+                String meetId = splitted[1].split("=")[1];
+                String clubId = splitted[2].split("=")[1];
+                return new Competition(meetId, this.getFirstText(competition, "td.date"), this.getFirstText(competition, "td.city"), this.getFirstText(competition, "td.course"), clubId);
+            }).toList();
+            return Optional.of(new AthleteDetails(id, name.childNode(0).toString().trim(), club, competitionList));
+        }
     }
 
     private String clubName(Element nationclub) {
-        if(nationclub.childNodeSize()>=4){
+        if (nationclub.childNodeSize() >= 4) {
             var clubName = nationclub.childNode(3).toString();
             return clubName
-                    .replace(" - Luxembourg","");
+                    .replace(" - Luxembourg", "");
         }
         return nationclub.text();
     }
@@ -76,6 +69,7 @@ public class SwimRankingBrowserService {
         var competitionRows = parsedDoc.select("tr.meetResult1,tr.meetResult0");
         boolean take = false;
         List<AthleteTime> times = new ArrayList<>();
+
         for (Element row : competitionRows) {
             if (row.hasClass("meetResult1")) {
                 take = row.text().contains(name);

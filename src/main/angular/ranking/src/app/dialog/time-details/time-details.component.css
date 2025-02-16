@@ -1,0 +1,14 @@
+.time{
+  font-weight:bolder;
+  font-size:large;
+  width:100%;
+  display:inline-block;
+  text-align:center
+}
+.type{
+  width:100px;
+  text-align:right;
+  margin:3px;
+  font-weight:700;
+  display:inline-block
+}

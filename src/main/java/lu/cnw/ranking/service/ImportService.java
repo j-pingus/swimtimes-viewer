@@ -8,6 +8,7 @@ import lu.cnw.ranking.utils.DateUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -21,60 +22,37 @@ public class ImportService {
     private final TimeRepository timeRepository;
 
     public void importAthlete(String id) throws IOException {
-        var athleteDetails = swimRankingBrowserService.getAthleteDetails(id);
-        var foundAthlete = athleteRepository.findBySwimRankingId(id);
-        var foundClub = clubRepository.findByName(athleteDetails.club());
-
-        Club club = foundClub.orElseGet(() ->
-                clubRepository.save(new Club()
-                        .setName(athleteDetails.club())
-                ));
-        logger.info("Club:{}", club);
-        Athlete athlete = foundAthlete.orElseGet(() ->
-                athleteRepository.save(new Athlete()
-                        .setSwimRankingId(id)
-                        .setName(athleteDetails.name())
-                        .setClub(club)
-                ));
-        logger.info("Athlete:{}", athlete);
-        athleteDetails.competitionList().forEach(competition -> {
-            importCompetition(athlete, competition);
-        });
+        Optional<SwimRankingBrowserService.AthleteDetails> athleteDetails = this.swimRankingBrowserService.getAthleteDetails(id);
+        if (athleteDetails.isPresent()) {
+            Optional<Athlete> foundAthlete = this.athleteRepository.findBySwimRankingId(id);
+            Optional<Club> foundClub = this.clubRepository.findByName(athleteDetails.get().club());
+            Club club = foundClub.orElseGet(() -> this.clubRepository.save((new Club()).setName(athleteDetails.get().club())));
+            logger.info("Club:{}", club);
+            Athlete athlete = foundAthlete.orElseGet(() -> this.athleteRepository.save((new Athlete()).setSwimRankingId(id).setName(athleteDetails.get().name()).setClub(club)));
+            logger.info("Athlete:{}", athlete);
+            athleteDetails.get().competitionList().forEach((competition) -> this.importCompetition(athlete, competition));
+        }
     }
 
     private void importCompetition(Athlete athlete, SwimRankingBrowserService.Competition comp) {
-        var foundCompetition = competitionRepository.findBySwimRankingId(comp.swimRankingId());
-        //if (foundCompetition.isPresent()) return;
-        if (!DateUtil.isYearOfInteres(comp.date())) return;
-        Competition competition = foundCompetition.orElseGet(() ->
-                competitionRepository.save(new Competition()
-                        .setName(comp.city())
-                        .setDate(comp.date())
-                        .setCourse(comp.course())
-                        .setSwimRankingId(comp.swimRankingId())
-                ));
-        logger.info("Competition:{}", competition);
-        try {
-            swimRankingBrowserService.getAthleteTimes(athlete.getName(), comp.swimRankingId(), comp.clubId()).forEach(
-                    time -> {
-                        var foundStroke = strokeRepository.findByName(time.stroke());
-                        var stroke = foundStroke.orElseGet(
-                                () -> strokeRepository.save(new Stroke().setName(time.stroke()).setDistance(time.distance()))
-                        );
-                        var foundTime = timeRepository.findByAthleteAndStrokeAndCompetition(athlete, stroke, competition);
-                        if (foundTime.isEmpty()) {
-                            timeRepository.save(new Time()
-                                    .setCompetition(competition)
-                                    .setStroke(stroke)
-                                    .setAthlete(athlete)
-                                    .setTime(time.time())
-                                    .setSeconds(time.seconds())
-                            );
-                        }
+        Optional<Competition> foundCompetition = this.competitionRepository.findBySwimRankingId(comp.swimRankingId());
+        if (DateUtil.isYearOfInterest(comp.date())) {
+            Competition competition = foundCompetition.orElseGet(() -> this.competitionRepository.save((new Competition()).setName(comp.city()).setDate(comp.date()).setCourse(comp.course()).setSwimRankingId(comp.swimRankingId())));
+            logger.info("Competition:{}", competition);
+
+            try {
+                this.swimRankingBrowserService.getAthleteTimes(athlete.getName(), comp.swimRankingId(), comp.clubId()).forEach((time) -> {
+                    Optional<Stroke> foundStroke = this.strokeRepository.findByName(time.stroke());
+                    Stroke stroke = foundStroke.orElseGet(() -> this.strokeRepository.save((new Stroke()).setName(time.stroke()).setDistance(time.distance())));
+                    Optional<Time> foundTime = this.timeRepository.findByAthleteAndStrokeAndCompetition(athlete, stroke, competition);
+                    if (foundTime.isEmpty()) {
+                        this.timeRepository.save((new Time()).setCompetition(competition).setStroke(stroke).setAthlete(athlete).setTime(time.time()).setSeconds(time.seconds()));
                     }
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

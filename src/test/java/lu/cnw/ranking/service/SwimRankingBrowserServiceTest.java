@@ -21,10 +21,10 @@ class SwimRankingBrowserServiceTest {
     void getAthleteDetails() throws IOException {
         var details = service.getAthleteDetails("5423869");
         System.out.println(details);
-        details.competitionList().forEach(competition -> {
+        details.get().competitionList().forEach(competition -> {
             try {
                 System.out.println(service.getAthleteTimes(
-                        details.name(),
+                        details.get().name(),
                         competition.swimRankingId(),
                         competition.clubId()));
             } catch (IOException e) {
@@ -35,7 +35,7 @@ class SwimRankingBrowserServiceTest {
 
     @Test
     void getAthlete2() throws IOException {
-        service.getAthleteDetails("5478192").competitionList().forEach(
+        service.getAthleteDetails("5478192").get().competitionList().forEach(
                 c -> {
                     try {
                         service.getAthleteTimes("GASPARD, Olivia", c.swimRankingId(), c.clubId());
