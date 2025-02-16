@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {ReferencesService} from "../../services/references.service";
 import {Observable} from "rxjs";
 import {Stroke} from "../../domain/Stroke";
@@ -8,6 +8,7 @@ import {Time} from "../../domain/Time";
 import {Athlete} from "../../domain/Athlete";
 import {MatDialog} from "@angular/material/dialog";
 import {TimeDetailsComponent} from "../../dialog/time-details/time-details.component";
+import {CompareService} from "../../services/compare.service";
 
 @Component({
   selector: 'app-athlete',
@@ -21,10 +22,13 @@ export class AthleteComponent implements OnInit {
     swimRankingId: ''
   };
   strokes: Array<StrokeTimes> = [];
+  compared: Array<Athlete> = [];
 
   constructor(route: ActivatedRoute,
               private referenceService: ReferencesService,
               private athleteService: AthleteService,
+              private compareService: CompareService,
+              private router: Router,
               public dialog: MatDialog) {
     route.params.subscribe(params => {
       // (+) converts string 'id' to a number
@@ -34,6 +38,9 @@ export class AthleteComponent implements OnInit {
       });
       this.reload(athleteId);
     });
+    this.compareService.compared$.subscribe(
+      c => this.compared = c
+    );
   }
 
   reload(athleteId: number) {
@@ -61,7 +68,7 @@ export class AthleteComponent implements OnInit {
     })
   }
 
-  import(swimRankingId: string) {
+  import() {
     this.athleteService.importAthelete(this.athlete.swimRankingId).subscribe(() => {
       this.reload(this.athlete.id);
     })
@@ -71,6 +78,18 @@ export class AthleteComponent implements OnInit {
     this.dialog.open(TimeDetailsComponent, {
       data: time
     });
+  }
+
+  compare() {
+    this.compareService.addAthlete(this.athlete);
+  }
+
+  remove(c: Athlete) {
+    this.compareService.removeAthlete(c.id);
+  }
+
+  seeComparison() {
+    this.router.navigate(['compared']);
   }
 }
 

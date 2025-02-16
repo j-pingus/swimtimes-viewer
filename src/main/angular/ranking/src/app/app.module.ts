@@ -15,6 +15,9 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {MatInputModule} from "@angular/material/input";
 import {FormsModule} from "@angular/forms";
 import { TimeDetailsComponent } from './dialog/time-details/time-details.component';
+import {MatChipsModule} from "@angular/material/chips";
+import {MatIconModule} from "@angular/material/icon";
+import { CompareComponent } from './page/compare/compare.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +26,8 @@ import { TimeDetailsComponent } from './dialog/time-details/time-details.compone
     ClubComponent,
     AthleteComponent,
     SwimrankingNumberComponent,
-    TimeDetailsComponent
+    TimeDetailsComponent,
+    CompareComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +38,9 @@ import { TimeDetailsComponent } from './dialog/time-details/time-details.compone
     MatTooltipModule,
     MatDialogModule,
     MatInputModule,
-    FormsModule
+    FormsModule,
+    MatChipsModule,
+    MatIconModule
   ],
   providers: [],
   bootstrap: [AppComponent]

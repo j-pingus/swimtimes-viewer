@@ -1,0 +1,23 @@
+<div>
+  <button mat-raised-button (click)="compareCourse('50m')">50 m</button>
+  <button mat-raised-button (click)="compareCourse('25m')">25 m</button>
+</div>
+<table>
+  <tr>
+    <th>strokes</th>
+    <th *ngFor="let a of athletes">
+      {{ a.name }}
+    </th>
+  </tr>
+  <tr *ngFor="let stroke of strokes">
+    <td class="stroke">{{ stroke.stroke.name }}</td>
+    <td *ngFor="let compare of stroke.compared" class="times">
+      <span *ngFor="let time of (compare |async); index as i"
+            [ngClass]="'b'+time.competition.course">
+        <span *ngIf="time.competition.course === course && i===0">
+        {{ time.time }},
+        </span>
+      </span>
+    </td>
+  </tr>
+</table>

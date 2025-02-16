@@ -1,19 +1,29 @@
 <div>
-  {{athlete.name}}
+  {{ athlete.name }}
   <button mat-raised-button color="accent" (click)="showYear('2025')">2025</button>
   <button mat-raised-button color="accent" (click)="showYear('2024')">2024</button>
   <button mat-raised-button color="accent" (click)="showYear('2023')">2023</button>
-  <button mat-raised-button color="warn" (click)="import(athlete.swimRankingId)">refresh import</button>
+  <button mat-raised-button color="warn" (click)="import()">refresh import</button>
+  <button mat-raised-button (click)="compare()">compare {{athlete.name}}</button>
 </div>
 <table>
   <tr *ngFor="let stroke of strokes">
-    <td class="stroke">{{stroke.stroke.name}}</td>
+    <td class="stroke">{{ stroke.stroke.name }}</td>
     <td class="times">
       <span *ngFor="let time of stroke.times | async"
             (click)="openDialog(time)"
             [ngClass]="'b'+time.competition.course">
-        {{time.time}},
+        {{ time.time }},
       </span>
     </td>
   </tr>
 </table>
+<mat-chip-list>
+  <mat-chip *ngFor="let c of compared" (removed)="remove(c)">
+    {{ c.name }}
+    <button matChipRemove>
+      <mat-icon>cancel</mat-icon>
+    </button>
+  </mat-chip>
+  <button *ngIf="compared.length>1" mat-raised-button (click)="seeComparison()">compare</button>
+</mat-chip-list>
