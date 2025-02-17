@@ -9,7 +9,6 @@
 }
 
 .times{
-  //max-width: 400px;
   text-overflow-ellipsis: '...';
 }
 tr:nth-child(odd){

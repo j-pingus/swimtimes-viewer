@@ -18,4 +18,5 @@ public class Time {
     Stroke stroke;
     String time;
     Double seconds;
+    Long points;
 }

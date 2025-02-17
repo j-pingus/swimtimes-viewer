@@ -3,7 +3,7 @@ import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {Time} from "../domain/Time";
-import {Athlete} from "../domain/Athlete";
+import {AtheletePoints, Athlete} from "../domain/Athlete";
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +26,9 @@ export class AthleteService {
     return this.http.get<Athlete>(AthleteService.SERVICE_URL + athlete);
   }
 
+  public points(athlete: number): Observable<Array<AtheletePoints>>{
+    return this.http.get<Array<AtheletePoints>>(AthleteService.SERVICE_URL + athlete+"/points");
+  }
   public importAthelete(athlete: string): Observable<any> {
     return this.http.get(AthleteService.SERVICE_URL + athlete + "/import");
   }

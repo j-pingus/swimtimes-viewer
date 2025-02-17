@@ -47,7 +47,12 @@ public class SwimRankingBrowserService {
                 String[] splitted = link.split("&");
                 String meetId = splitted[1].split("=")[1];
                 String clubId = splitted[2].split("=")[1];
-                return new Competition(meetId, this.getFirstText(competition, "td.date"), this.getFirstText(competition, "td.city"), this.getFirstText(competition, "td.course"), clubId);
+                return new Competition(
+                        meetId,
+                        this.getFirstText(competition, "td.date"),
+                        this.getFirstText(competition, "td.city"),
+                        this.getFirstText(competition, "td.course"),
+                        clubId);
             }).toList();
             return Optional.of(new AthleteDetails(id, name.childNode(0).toString().trim(), club, competitionList));
         }
@@ -60,6 +65,13 @@ public class SwimRankingBrowserService {
                     .replace(" - Luxembourg", "");
         }
         return nationclub.text();
+    }
+
+    public String getCompetitionName(String meetId, String clubId) throws IOException {
+        String key = "competition/" + meetId + "/" + clubId;
+        String competitionDetails = getCached(Retention.FOREVER, key, meetDetails, meetId, clubId);
+        var parsedDoc = Jsoup.parse(competitionDetails);
+        return parsedDoc.select("td.titleLeft").first().text();
     }
 
     public List<AthleteTime> getAthleteTimes(String name, String meetId, String clubId) throws IOException {
@@ -79,10 +91,18 @@ public class SwimRankingBrowserService {
                 if (row.select("td.name").size() > 1) break;
                 String time = getFirstText(row, "a.time");
                 String stroke = getFirstText(row, "td.name");
+                String points = getFirstText(row, "td.code");
+                Long pointsLong = 0L;
+                try {
+                    pointsLong = Long.parseLong(points);
+                } catch (NumberFormatException e) {
+
+                }
                 times.add(new AthleteTime(
                         time,
                         getSeconds(time),
                         stroke,
+                        pointsLong,
                         DistanceConverter.computeDistance(stroke),
                         getFirstText(row, "td.meetPlace"))
                 );
@@ -174,7 +194,7 @@ public class SwimRankingBrowserService {
         DAY, FOREVER
     }
 
-    public record AthleteTime(String time, Double seconds, String stroke, int distance, String place) {
+    public record AthleteTime(String time, Double seconds, String stroke, Long points, int distance, String place) {
     }
 
     public record AthleteDetails(String swimRankingId, String name, String club,

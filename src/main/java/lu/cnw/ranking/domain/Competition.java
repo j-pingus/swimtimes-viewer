@@ -10,6 +10,7 @@ public class Competition {
     @SequenceGenerator(name = "CompetitionSequence")
     @Id
     Integer id;
+    String city;
     String name;
     String course;
     String date;

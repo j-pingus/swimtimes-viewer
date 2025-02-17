@@ -23,6 +23,7 @@ export class AthleteComponent implements OnInit {
   };
   strokes: Array<StrokeTimes> = [];
   compared: Array<Athlete> = [];
+  points: number = 0;
 
   constructor(route: ActivatedRoute,
               private referenceService: ReferencesService,
@@ -44,6 +45,12 @@ export class AthleteComponent implements OnInit {
   }
 
   reload(athleteId: number) {
+    this.athleteService.points(athleteId).subscribe(
+      p => {
+        console.log("points:", p);
+        this.points =
+          p.reduce((sum, points) => sum + points.points, 0);
+      });
     this.referenceService.getStrokes().subscribe(strokes => {
       this.strokes = strokes.map(
         stroke => {

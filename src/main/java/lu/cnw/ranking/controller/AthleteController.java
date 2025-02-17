@@ -1,6 +1,7 @@
 package lu.cnw.ranking.controller;
 
 import lombok.AllArgsConstructor;
+import lu.cnw.ranking.domain.AtheletePoints;
 import lu.cnw.ranking.domain.Athlete;
 import lu.cnw.ranking.domain.Time;
 import lu.cnw.ranking.repository.AthleteRepository;
@@ -31,7 +32,6 @@ public class AthleteController {
 
     @GetMapping("{id}/stroke/{stroke}/time")
     public List<Time> getTimes(@PathVariable int id, @PathVariable int stroke) {
-        // return timeRepository.findByAthleteIdAndStrokeIdOrderBySecondsAsc(id, stroke);
         return timeRepository.findTimes(id, stroke, DateUtil.getYearsOfInterest()[0], DateUtil.getYearsOfInterest()[1]);
     }
 
@@ -49,5 +49,9 @@ public class AthleteController {
     @GetMapping("{id}")
     public Athlete getAthlete(@PathVariable int id) {
         return athleteRepository.findById(id).orElseThrow(() -> new Error("Athelete not found"));
+    }
+    @GetMapping("{id}/points")
+    public List<AtheletePoints> getAthletePoints(@PathVariable int id) {
+        return timeRepository.getAtheletesPoints(id);
     }
 }

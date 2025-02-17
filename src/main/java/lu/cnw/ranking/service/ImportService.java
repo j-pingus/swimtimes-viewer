@@ -37,7 +37,27 @@ public class ImportService {
     private void importCompetition(Athlete athlete, SwimRankingBrowserService.Competition comp) {
         Optional<Competition> foundCompetition = this.competitionRepository.findBySwimRankingId(comp.swimRankingId());
         if (DateUtil.isYearOfInterest(comp.date())) {
-            Competition competition = foundCompetition.orElseGet(() -> this.competitionRepository.save((new Competition()).setName(comp.city()).setDate(comp.date()).setCourse(comp.course()).setSwimRankingId(comp.swimRankingId())));
+            Competition competition = foundCompetition.orElseGet(() -> {
+                try {
+                    return this.competitionRepository.save(new Competition()
+                            .setCity(comp.city())
+                            .setName(this.swimRankingBrowserService.getCompetitionName(comp.swimRankingId(), comp.clubId()))
+                            .setDate(comp.date())
+                            .setCourse(comp.course())
+                            .setSwimRankingId(comp.swimRankingId()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            if (competition.getCity() == null) {
+                try {
+                    competition.setCity(competition.getName());
+                    competition.setName(this.swimRankingBrowserService.getCompetitionName(comp.swimRankingId(), comp.clubId()));
+                    this.competitionRepository.save(competition);
+                } catch (IOException e) {
+                    logger.error("Could not find competition name");
+                }
+            }
             logger.info("Competition:{}", competition);
 
             try {
@@ -46,7 +66,16 @@ public class ImportService {
                     Stroke stroke = foundStroke.orElseGet(() -> this.strokeRepository.save((new Stroke()).setName(time.stroke()).setDistance(time.distance())));
                     Optional<Time> foundTime = this.timeRepository.findByAthleteAndStrokeAndCompetition(athlete, stroke, competition);
                     if (foundTime.isEmpty()) {
-                        this.timeRepository.save((new Time()).setCompetition(competition).setStroke(stroke).setAthlete(athlete).setTime(time.time()).setSeconds(time.seconds()));
+                        this.timeRepository.save(new Time()
+                                .setCompetition(competition)
+                                .setStroke(stroke)
+                                .setAthlete(athlete)
+                                .setTime(time.time())
+                                .setSeconds(time.seconds())
+                                .setPoints(time.points())
+                        );
+                    }else{
+                        this.timeRepository.save(foundTime.get().setPoints(time.points()));
                     }
 
                 });
