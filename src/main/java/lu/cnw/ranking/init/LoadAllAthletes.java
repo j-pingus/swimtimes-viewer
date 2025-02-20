@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,14 +27,12 @@ public class LoadAllAthletes implements InitializingBean {
         try (var stream = Files.find(cachePath, 2, (path, basicFileAttributes) ->
                 path.toFile().getName().matches("\\d+")
         )) {
-            stream.map(Path::toFile)
-                    .map(File::getName).forEach(
+            stream
+                    .map(Path::toFile)
+                    .map(File::getName)
+                    .forEach(
                             id -> {
-                                try {
-                                    importService.importAthlete(id);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
+                                importService.importAthlete(id);
                             }
                     );
         }

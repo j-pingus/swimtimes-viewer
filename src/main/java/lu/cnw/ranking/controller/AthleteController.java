@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -42,7 +41,7 @@ public class AthleteController {
     }
 
     @GetMapping("{id}/import")
-    public void importAthlete(@PathVariable String id) throws IOException {
+    public void importAthlete(@PathVariable String id) {
         importService.importAthlete(id);
     }
 
@@ -50,6 +49,7 @@ public class AthleteController {
     public Athlete getAthlete(@PathVariable int id) {
         return athleteRepository.findById(id).orElseThrow(() -> new Error("Athelete not found"));
     }
+
     @GetMapping("{id}/points")
     public List<AtheletePoints> getAthletePoints(@PathVariable int id) {
         return timeRepository.getAtheletesPoints(id);
