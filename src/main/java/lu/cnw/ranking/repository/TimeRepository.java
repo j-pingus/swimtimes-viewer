@@ -20,4 +20,5 @@ public interface TimeRepository extends CrudRepository<Time,Integer> {
             "where t.athlete.id=:id " +
             "group by t.stroke,t.competition.course")
     List<AtheletePoints> getAtheletesPoints(int id);
+    int deleteAllByAthleteIdAndCompetitionDateContains(int athleteId, String competitionDate);
 }

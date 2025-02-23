@@ -7,7 +7,12 @@
 .stroke{
 
 }
-
+.points:hover{
+  font-weight: bolder;
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}
 .times{
   text-overflow-ellipsis: '...';
 }

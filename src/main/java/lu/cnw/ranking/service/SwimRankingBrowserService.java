@@ -74,7 +74,7 @@ public class SwimRankingBrowserService {
         return parsedDoc.select("td.titleLeft").first().text();
     }
 
-    public List<AthleteTime> getAthleteTimes(String name, String meetId, String clubId) throws IOException {
+    public List<AthleteTime> getAthleteTimes(String name, String meetId, String clubId, boolean clearCache) throws IOException {
         String key = "competition/" + meetId + "/" + clubId;
         String competitionDetails = getCached(Retention.FOREVER, key, meetDetails, meetId, clubId);
         var parsedDoc = Jsoup.parse(competitionDetails);
@@ -168,7 +168,14 @@ public class SwimRankingBrowserService {
     }
 
     private String getCached(Retention retention, String key, String page, String... args) throws IOException {
+        return getCached(retention, key, page, false, args);
+    }
+
+    private String getCached(Retention retention, String key, String page, boolean clearCache, String... args) throws IOException {
         File cached = new File(cacheFolder, key);
+        if (clearCache) {
+            cached.delete();
+        }
         if (cached.exists() && retention == Retention.DAY) {
             Path file = Paths.get(cached.getAbsolutePath());
             BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);

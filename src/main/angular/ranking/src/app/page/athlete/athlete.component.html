@@ -1,8 +1,7 @@
 <div>
-  {{ athlete.name }} - {{points}} points
+  {{ athlete.name }} - <span class="points" (click)="showDetails()">{{points}}</span> points
   <button mat-raised-button color="accent" (click)="showYear('2025')">2025</button>
   <button mat-raised-button color="accent" (click)="showYear('2024')">2024</button>
-  <button mat-raised-button color="accent" (click)="showYear('2023')">2023</button>
   <button mat-raised-button color="warn" (click)="import()">refresh import</button>
   <button mat-raised-button (click)="compare()">compare {{athlete.name}}</button>
 </div>

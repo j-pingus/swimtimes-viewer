@@ -1,6 +1,7 @@
 package lu.cnw.ranking.init;
 
 import lu.cnw.ranking.service.ImportService;
+import lu.cnw.ranking.utils.DateUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,11 +31,8 @@ public class LoadAllAthletes implements InitializingBean {
             stream
                     .map(Path::toFile)
                     .map(File::getName)
-                    .forEach(
-                            id -> {
-                                importService.importAthlete(id);
-                            }
-                    );
+                    .forEach(id ->
+                            importService.importAthlete(id,false, DateUtil.getYearsOfInterest()));
         }
     }
 }

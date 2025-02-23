@@ -1,0 +1,17 @@
+<div class="scrollable">
+
+  <table>
+    <tr>
+      <th>Stroke</th>
+      <th>25 m</th>
+      <th>50 m</th>
+    </tr>
+    <tr *ngFor="let point of details">
+      <ng-container *ngIf="point.m50>0 || point.m25>0">
+        <td>{{ point.stroke }}</td>
+        <td>{{ point.m25 }} pts.</td>
+        <td>{{ point.m50 }} pts.</td>
+      </ng-container>
+    </tr>
+  </table>
+</div>

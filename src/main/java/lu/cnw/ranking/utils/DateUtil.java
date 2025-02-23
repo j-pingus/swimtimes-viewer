@@ -29,8 +29,12 @@ public class DateUtil {
         return yearsOfInterest;
     }
 
-    public static boolean isYearOfInterest(String date) {
-        return date.contains(getYearsOfInterest()[0]) ||
-                date.contains(getYearsOfInterest()[1]);
+    public static boolean isYearOfInterest(String date,String ... yearOfInterest) {
+        for(String year : yearOfInterest) {
+            if(date.contains(year)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

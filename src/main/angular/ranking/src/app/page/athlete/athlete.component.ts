@@ -5,10 +5,11 @@ import {Observable} from "rxjs";
 import {Stroke} from "../../domain/Stroke";
 import {AthleteService} from "../../services/athlete.service";
 import {Time} from "../../domain/Time";
-import {Athlete} from "../../domain/Athlete";
+import {AtheletePoints, Athlete} from "../../domain/Athlete";
 import {MatDialog} from "@angular/material/dialog";
 import {TimeDetailsComponent} from "../../dialog/time-details/time-details.component";
 import {CompareService} from "../../services/compare.service";
+import {PointsDetailsComponent} from "../../dialog/points-details/points-details.component";
 
 @Component({
   selector: 'app-athlete',
@@ -24,6 +25,7 @@ export class AthleteComponent implements OnInit {
   strokes: Array<StrokeTimes> = [];
   compared: Array<Athlete> = [];
   points: number = 0;
+  private pointsDetails: Array<AtheletePoints>=[];
 
   constructor(route: ActivatedRoute,
               private referenceService: ReferencesService,
@@ -47,7 +49,7 @@ export class AthleteComponent implements OnInit {
   reload(athleteId: number) {
     this.athleteService.points(athleteId).subscribe(
       p => {
-        console.log("points:", p);
+        this.pointsDetails = p;
         this.points =
           p.reduce((sum, points) => sum + points.points, 0);
       });
@@ -97,6 +99,12 @@ export class AthleteComponent implements OnInit {
 
   seeComparison() {
     this.router.navigate(['compared']);
+  }
+
+  showDetails() {
+    this.dialog.open(PointsDetailsComponent,{
+      data:this.pointsDetails
+    });
   }
 }
 

@@ -26,7 +26,7 @@ class SwimRankingBrowserServiceTest {
                 System.out.println(service.getAthleteTimes(
                         details.get().name(),
                         competition.swimRankingId(),
-                        competition.clubId()));
+                        competition.clubId(), false));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -38,7 +38,7 @@ class SwimRankingBrowserServiceTest {
         service.getAthleteDetails("5478192").get().competitionList().forEach(
                 c -> {
                     try {
-                        service.getAthleteTimes("GASPARD, Olivia", c.swimRankingId(), c.clubId());
+                        service.getAthleteTimes("GASPARD, Olivia", c.swimRankingId(), c.clubId(), false);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -48,7 +48,7 @@ class SwimRankingBrowserServiceTest {
 
     @Test
     void getAthleteTimes() throws IOException {
-        var times = service.getAthleteTimes("EVEN, Renaud", "645678", "73544");
+        var times = service.getAthleteTimes("EVEN, Renaud", "645678", "73544", false);
         System.out.println(times);
     }
 

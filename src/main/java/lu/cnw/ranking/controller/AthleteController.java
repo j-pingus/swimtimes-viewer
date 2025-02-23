@@ -42,7 +42,12 @@ public class AthleteController {
 
     @GetMapping("{id}/import")
     public void importAthlete(@PathVariable String id) {
-        importService.importAthlete(id);
+        importService.importAthlete(id,false, DateUtil.getYearsOfInterest());
+    }
+
+    @GetMapping("{id}/import/{year}")
+    public void importAthleteYear(@PathVariable String id, @PathVariable String year) {
+        importService.importAthlete(id,true, year);
     }
 
     @GetMapping("{id}")

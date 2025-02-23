@@ -18,6 +18,7 @@ import { TimeDetailsComponent } from './dialog/time-details/time-details.compone
 import {MatChipsModule} from "@angular/material/chips";
 import {MatIconModule} from "@angular/material/icon";
 import { CompareComponent } from './page/compare/compare.component';
+import { PointsDetailsComponent } from './dialog/points-details/points-details.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { CompareComponent } from './page/compare/compare.component';
     AthleteComponent,
     SwimrankingNumberComponent,
     TimeDetailsComponent,
-    CompareComponent
+    CompareComponent,
+    PointsDetailsComponent
   ],
   imports: [
     BrowserModule,
