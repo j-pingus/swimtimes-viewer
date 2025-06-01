@@ -4,14 +4,13 @@ import lu.cnw.ranking.service.ImportService;
 import lu.cnw.ranking.utils.DateUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Component
+//@Component
 public class LoadAllAthletes implements InitializingBean {
     final ImportService importService;
     final String cacheFolder;
@@ -32,7 +31,7 @@ public class LoadAllAthletes implements InitializingBean {
                     .map(Path::toFile)
                     .map(File::getName)
                     .forEach(id ->
-                            importService.importAthlete(id,false, DateUtil.getYearsOfInterest()));
+                            importService.importAthlete(id, false, DateUtil.getYearsOfInterest()));
         }
     }
 }
